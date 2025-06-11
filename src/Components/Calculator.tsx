@@ -18,7 +18,7 @@ export function Calculator() {
   const calculateResult = () => {
     try {
       const result = eval(input); 
-      setInput(String(result));
+      setInput(result);
     } catch {
       setInput("Error");
     }
