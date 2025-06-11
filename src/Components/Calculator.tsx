@@ -15,10 +15,55 @@ export function Calculator() {
     setInput((prev) => prev.slice(0, -1));
   };
 
+  function EvaluateProblem(expr: string): number {
+    const tokens = expr.match(/(\d+(\.\d+)?|\+|\-|\*|\/|\(|\))/g);
+    if (!tokens) throw new Error("Invalid input");
+  
+    let pos = 0;
+  
+    function Expression(): number {
+      let result = Operator();
+      while (tokens![pos] === '+' || tokens![pos] === '-') {
+        const op = tokens![pos++];
+        const right = Operator();
+        result = op === '+' ? result + right : result - right;
+      }
+      return result;
+    }
+  
+    function Operator(): number {
+      let result = Factor();
+      while (tokens![pos] === '*' || tokens![pos] === '/') {
+        const op = tokens![pos++];
+        const right = Factor();
+        if (op === '*') result *= right;
+        else result /= right;
+      }
+      return result;
+    }
+  
+    function Factor(): number {
+      const token = tokens![pos++];
+      if (token === '(') {
+        const result = Expression();
+        if (tokens![pos++] !== ')') throw new Error("Mismatched parentheses");
+        return result;
+      } else if (!isNaN(Number(token))) {
+        return parseFloat(token!);
+      } else {
+        throw new Error("Invalid token: " + token);
+      }
+    }
+  
+    const result = Expression();
+    if (pos < tokens.length) throw new Error("Unexpected token");
+    return result;
+  }
+
   const calculateResult = () => {
     try {
-      const result = eval(input); 
-      setInput(result);
+      const result = EvaluateProblem(input);
+      setInput(result.toString());
     } catch {
       setInput("Error");
     }
